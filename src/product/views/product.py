@@ -12,7 +12,8 @@ class CreateProductView(TemplateView):
     template_name = 'products/create.html'
 
     def get_context_data(self, **kwargs):
-	@@ -12,3 +16,23 @@ def get_context_data(self, **kwargs):
+        context = super(CreateProductView, self).get_context_data(**kwargs)
+        variants = Variant.objects.filter(active=True).values('id', 'title')
         context['product'] = True
         context['variants'] = list(variants.all())
         return context
@@ -33,4 +34,31 @@ class CreateProductAPIView(View):
         }
         a_product = Product.objects.create(**product_data)
 
+        product_variant_data = data.get("product_variant", None)
+
+        variant_dict = {}
+        for variant in product_variant_data:
+            for tag in variant.get("tags"):
+                variant_data = {
+                    "product": a_product,
+                    "variant_title": tag,
+                    "variant": Variant.objects.filter(id=variant.get("option")).first()
+                }
+                a_product_variant = ProductVariant.objects.create(**variant_data)
+                variant_dict[tag] = a_product_variant
+            del tag
+        del variant
+        product_variant_prices_data = data.get("product_variant_prices", None)
+        for product_variant_price in product_variant_prices_data:
+            variants = product_variant_price.get("title", None).split("/")
+            product_variant_price_data = {
+                "product_variant_one": variant_dict[variants[0]],
+                "product_variant_two": variant_dict[variants[1]],
+                "product_variant_three": variant_dict[variants[2]],
+                "price": product_variant_price.get("price", None),
+                "stock": product_variant_price.get("stock", None),
+                "product": a_product
+            }
+            ProductVariantPrice.objects.create(**product_variant_price_data)
+        del product_variant_price
         return JsonResponse({"data": "New Product is created"})
