@@ -12,7 +12,8 @@ urlpatterns = [
     path('variant/create', VariantCreateView.as_view(), name='create.variant'),
     path('variant/<int:id>/edit', VariantEditView.as_view(), name='update.variant'),
 
-   path('create/', CreateProductView.as_view(), name='create.product'),
+    # Products URLs
+    path('create/', CreateProductView.as_view(), name='create.product'),
     path('create-api/', CreateProductAPIView.as_view(), name='create.product.api'),
     path('list/', ProductsView.as_view(), name='list.product'),
 ]
