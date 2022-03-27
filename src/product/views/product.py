@@ -2,11 +2,12 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django.http import JsonResponse
-from product.models import Product, ProductVariant, ProductVariantPrice
+from product.models import Variant, Product, ProductVariant, ProductVariantPrice
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.shortcuts import redirect, render
+from django.core.paginator import Paginator
 
-from product.models import Variant
 
 class CreateProductView(TemplateView):
     template_name = 'products/create.html'
@@ -33,7 +34,6 @@ class CreateProductAPIView(View):
             "description": data.get("description", None),
         }
         a_product = Product.objects.create(**product_data)
-
         product_variant_data = data.get("product_variant", None)
 
         variant_dict = {}
@@ -61,4 +61,21 @@ class CreateProductAPIView(View):
             }
             ProductVariantPrice.objects.create(**product_variant_price_data)
         del product_variant_price
-        return JsonResponse({"data": "New Product is created"})
+        return redirect('list.product')
+        # return JsonResponse({"data": "New Product is created"})
+
+
+class ProductsView(TemplateView):
+
+    def get(self, request):
+        all_variant_product = ProductVariantPrice.objects.all()
+        paginator = Paginator(all_variant_product, 10)
+        page_number = request.GET.get("page", 1)
+        page_obj = paginator.get_page(page_number)
+
+        context = { "page_obj": page_obj }
+
+        return render(request, 'products/list.html', context=context)
+
+    def post(self, request):
+        pass
