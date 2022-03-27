@@ -100,8 +100,6 @@
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import InputTag from 'vue-input-tag'
-import axios from 'axios'
-
 export default {
   components: {
     vueDropzone: vue2Dropzone,
@@ -142,13 +140,11 @@ export default {
       let selected_variants = this.product_variant.map(el => el.option);
       let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
       // console.log(available_variants)
-
       this.product_variant.push({
         option: available_variants[0],
         tags: []
       })
     },
-
     // check the variant and render all the combination
     checkVariant() {
       let tags = [];
@@ -156,7 +152,6 @@ export default {
       this.product_variant.filter((item) => {
         tags.push(item.tags);
       })
-
       this.getCombn(tags).forEach(item => {
         this.product_variant_prices.push({
           title: item,
@@ -165,7 +160,6 @@ export default {
         })
       })
     },
-
     // combination algorithm
     getCombn(arr, pre) {
       pre = pre || '';
@@ -178,7 +172,6 @@ export default {
       }, []);
       return ans;
     },
-
     // store product into database
     saveProduct() {
       let product = {
@@ -189,18 +182,13 @@ export default {
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       }
-
-
-      axios.post('/product', product).then(response => {
+      axios.post('/product/create-api/', product).then(response => {
         console.log(response.data);
       }).catch(error => {
         console.log(error);
       })
-
       console.log(product);
     }
-
-
   },
   mounted() {
     console.log('Component mounted.')
